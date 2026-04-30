@@ -6,5 +6,7 @@ Note that this module uses a custom formula for water purification.
 This module is currently not compatible/linked with other modules of the Fabric version, and the workload is too large.
 
 License:CC-BY-NC-SA
+
 Icon: ChatGPT
+
 Co-Worked-By: MiMo-V2.5-Pro
