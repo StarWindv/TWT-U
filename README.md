@@ -5,7 +5,7 @@ This is the community version of the mod [Thirst-Mod](https://github.com/ghen-gi
 Note that this module uses a custom formula for water purification.
 This module is currently not linked with other modules of the Fabric version, and the workload is too large.
 
-License:CC-BY-NC-SA
+License: MIT
 
 Icon: ChatGPT
 
