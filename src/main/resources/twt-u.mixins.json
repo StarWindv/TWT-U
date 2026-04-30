@@ -1,0 +1,24 @@
+{
+	"required": true,
+	"package": "twtu.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"mixins": [
+		"MixinAbstractCookingRecipe",
+		"MixinAbstractFurnaceEntity",
+		"MixinBootstrap",
+		"MixinBottleItem",
+		"MixinBucketItem",
+		"MixinCampfireBlockEntity",
+		"MixinFoodData",
+		"MixinItemStack",
+		"MixinLayeredCauldronBlock",
+		"MixinPotionItem",
+		"MixinPlayer"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

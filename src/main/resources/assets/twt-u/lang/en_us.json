@@ -1,0 +1,24 @@
+{
+  "death.attack.dehydrate": "%1$s died from dehydration",
+  "death.attack.dehydrate.player": "%1$s died from dehydration while fighting %2$s",
+  "item.twt-u.wooden_water_bowl": "Wooden Water Bowl",
+  "item.twt-u.terracotta_water_bowl": "Terracotta Water Bowl",
+  "item.twt-u.terracotta_bowl": "Terracotta Bowl",
+  "item.twt-u.clay_bowl": "Clay Bowl",
+  "itemGroup.twt-u": "Thirst was Taken",
+  "twt-u.purity.dirty": "Dirty",
+  "twt-u.purity.slightly_dirty": "Slightly Dirty",
+  "twt-u.purity.acceptable": "Acceptable",
+  "twt-u.purity.purified": "Purified",
+  "block.twt-u.sand_filter": "Sand Filter",
+  "twt-u.ponder.sand_filter.header": "Purifying Water with a Sand Filter",
+  "twt-u.ponder.sand_filter.text_1": "A Sand Filter purifies by one step water pumped through it",
+  "twt-u.ponder.sand_filter.text_2": "Dirty Water needs to be pumped in from the top...",
+  "twt-u.ponder.sand_filter.text_3": "and Purified Water can be pumped out from the bottom",
+  "command.twt-u.query": "Current twt-u: %1$s, Current Quenched: %2$s",
+  "command.twt-u.set": "set thirst to %1$s, set quenched to %2$s",
+  "command.twt-u.enable": "Enable tick Thirst for %1$s",
+  "command.twt-u.disable": "Disable tick Thirst for %1$s"
+}
+
+

@@ -11,10 +11,10 @@ repositories {}
 loom {
 	splitEnvironmentSourceSets()
 
-	accessWidenerPath = file("src/main/resources/twt-ce.accesswidener")
+	accessWidenerPath = file("src/main/resources/twt-u.accesswidener")
 
 	mods {
-		"twt-ce" {
+		"twt-u" {
 			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}

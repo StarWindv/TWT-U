@@ -1,6 +1,6 @@
-<p align="center"><img src="https://github.com/starwindv/TWT-CE/blob/main/src/main/resources/assets/twt-ce/icon.png?raw=true"/></p>
+<p align="center"><img src="https://github.com/starwindv/TWT-U/blob/main/src/main/resources/assets/twt-u/icon-u.png?raw=true"/></p>
 
-This is the community version of the mod [Thirst-Mod](https://github.com/ghen-git/Thirst-Mod). This mod has been ported to the Fabric platform. Functionally, it remains largely similar, and many of the logic codes are from the original mod. I only made modifications from Forge API to Fabric API and made a few adjustments. 
+This is the unofficial version of the mod [Thirst-Mod](https://github.com/ghen-git/Thirst-Mod). This mod has been ported to the Fabric platform. Functionally, it remains largely similar, and many of the logic codes are from the original mod. I only made modifications from Forge API to Fabric API and made a few adjustments. 
 
 Note that this module uses a custom formula for water purification.
 This module is currently not linked with other modules of the Fabric version, and the workload is too large.

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "ingredient": {
+    "item": "twt-u:terracotta_water_bowl"
+  },
+  "result": "twt-u:terracotta_water_bowl",
+  "experience": 0.35,
+  "cookingtime": 600
+}
+

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "twt-u:terracotta_water_bowl"
+  },
+  "result": "twt-u:terracotta_water_bowl",
+  "experience": 0.35,
+  "cookingtime": 200
+}
+
