@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "twt-ce",
+	"version": "${version}",
+	"name": "Thirst Was Taken - Community Edition",
+	"description": "A thirst mod for Minecraft, ported from Forge to Fabric.",
+	"authors": [
+		"StarWindv"
+	],
+	"contact": {
+		"homepage": "https://github.com/StarWindv/TWT-CE"
+	},
+	"license": "CC-BY-NC-SA",
+	"icon": "assets/twt-ce/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"twtce.TWTCE"
+		],
+		"client": [
+			"twtce.client.TWTCEClient"
+		]
+	},
+	"mixins": [
+		"twt-ce.mixins.json",
+		{
+			"config": "twt-ce.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.15.0",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	}
+}
