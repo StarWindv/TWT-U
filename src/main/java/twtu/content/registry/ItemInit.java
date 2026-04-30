@@ -54,7 +54,7 @@ public class ItemInit
             entries.accept(WaterPurity.addPurity(new ItemStack(TERRACOTTA_WATER_BOWL), 0));
             entries.accept(WaterPurity.addPurity(new ItemStack(TERRACOTTA_WATER_BOWL), 1));
             entries.accept(WaterPurity.addPurity(new ItemStack(TERRACOTTA_WATER_BOWL), 2));
-            entries.accept(new ItemStack(TERRACOTTA_WATER_BOWL));
+            entries.accept(WaterPurity.addPurity(new ItemStack(TERRACOTTA_WATER_BOWL), 3));
         });
     }
 }
