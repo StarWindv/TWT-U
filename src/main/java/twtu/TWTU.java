@@ -13,7 +13,6 @@ import twtu.foundation.network.ThirstModPacketHandler;
 import twtu.foundation.util.TickHelper;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
