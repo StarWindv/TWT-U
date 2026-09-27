@@ -224,6 +224,46 @@ public class WaterPurity
         return false;
     }
 
+    public static boolean isWaterBottle(ItemStack stack)
+    {
+        return stack.is(Items.POTION) && PotionUtils.getPotion(stack) == Potions.WATER;
+    }
+
+    public static boolean isPlainPotion(ItemStack stack)
+    {
+        return stack.is(Items.POTION) && PotionUtils.getPotion(stack) == Potions.EMPTY;
+    }
+
+    /**
+     * input is a water container/water bottle, returns a new stack with the
+     * purity upgraded by bonus; otherwise returns result unchanged (same
+     * reference, so callers can detect "no change"). Never modifies result.
+     */
+    public static ItemStack applyCookingUpgrade(ItemStack input, ItemStack result, int bonus)
+    {
+        if (!(isWaterFilledContainer(input) || isWaterBottle(input)))
+            return result;
+
+        int inputPurity = (input.hasTag() && input.getTag() != null && input.getTag().contains("Purity"))
+                ? input.getTag().getInt("Purity") : CommonConfig.DEFAULT_PURITY;
+        int newPurity = Math.min(inputPurity + bonus, MAX_PURITY);
+
+        if (isWaterBottle(result) || isPlainPotion(result))
+        {
+            ItemStack upgraded = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
+            upgraded.getOrCreateTag().putInt("Purity", newPurity);
+            return upgraded;
+        }
+        else if (isWaterFilledContainer(result))
+        {
+            ItemStack copy = result.copy();
+            copy.getOrCreateTag().putInt("Purity", newPurity);
+            return copy;
+        }
+
+        return result;
+    }
+
     static boolean isFillableBlock(Block block)
     {
         for (Block fillable : fillablesWithPurity)

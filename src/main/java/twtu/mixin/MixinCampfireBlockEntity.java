@@ -1,24 +1,16 @@
 package twtu.mixin;
 
 import twtu.content.purity.WaterPurity;
-import twtu.foundation.config.CommonConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -26,30 +18,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin({CampfireBlockEntity.class})
 public abstract class MixinCampfireBlockEntity
 {
-    @Shadow private NonNullList<ItemStack> items;
-
-    @Inject(method = "cookTick", at = @At("RETURN"))
-    private static void upgradePurityOnCook(Level level, BlockPos pos, BlockState blockState, CampfireBlockEntity campfire, CallbackInfo ci) {
-        MixinCampfireBlockEntity self = (MixinCampfireBlockEntity) (Object) campfire;
-        NonNullList<ItemStack> items = self.items;
-
-        for (int i = 0; i < items.size(); i++) {
-            ItemStack result = items.get(i);
-            if (result.isEmpty()) continue;
-
-            if (WaterPurity.isWaterFilledContainer(result) || isWaterBottle(result)) {
-                if (!hasPurityTag(result)) {
-                    CompoundTag tag = result.getOrCreateTag();
-                    tag.putInt("Purity", CommonConfig.DEFAULT_PURITY);
-                } else {
-                    int currentPurity = result.getTag().getInt("Purity");
-                    int newPurity = Math.min(currentPurity + 1, WaterPurity.MAX_PURITY);
-                    result.getTag().putInt("Purity", newPurity);
-                }
-            }
-        }
-    }
-
     @Inject(
             method = {"particleTick"},
             at = {@At("HEAD")},
@@ -84,16 +52,6 @@ public abstract class MixinCampfireBlockEntity
 
             ci.cancel();
         }
-    }
-
-    @Unique
-    private static boolean isWaterBottle(ItemStack stack) {
-        return stack.is(Items.POTION) && PotionUtils.getPotion(stack) == Potions.WATER;
-    }
-
-    @Unique
-    private static boolean hasPurityTag(ItemStack stack) {
-        return stack.hasTag() && stack.getTag().contains("Purity");
     }
 }
 

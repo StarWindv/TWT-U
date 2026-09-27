@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import twtu.TWTU;
@@ -58,7 +59,9 @@ public class ThirstBarRenderer
         RenderSystem.enableBlend();
         RenderSystem.setShaderTexture(0, THIRST_ICONS);
         int left = width / 2 + 91 + ClientConfig.THIRST_BAR_X_OFFSET;
-        int top = height - 48 + ClientConfig.THIRST_BAR_Y_OFFSET;
+        boolean airBarVisible = minecraft.player.isEyeInFluid(FluidTags.WATER)
+                || minecraft.player.getAirSupply() < minecraft.player.getMaxAirSupply();
+        int top = height - (airBarVisible ? 59 : 48) + ClientConfig.THIRST_BAR_Y_OFFSET;
         boolean unused = false;
 
         int level = PLAYER_THIRST.getThirst();
