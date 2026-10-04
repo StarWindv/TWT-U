@@ -1,5 +1,8 @@
 {
   "values": [
-    "twt-u:sand_filter"
+    {
+      "id": "twt-u:sand_filter",
+      "required": false
+    }
   ]
 }
