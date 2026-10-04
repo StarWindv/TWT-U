@@ -56,11 +56,28 @@ public class WaterPurity
 
     public static final IntegerProperty BLOCK_PURITY = IntegerProperty.create("purity", 0, 4);
 
+    // 26.2 中 main 入口点阶段物品组件尚未绑定（"Components not bound yet"），
+    // 不允许创建 ItemStack，因此默认水容器推迟到首次使用时再注册
+    private static boolean containersRegistered = false;
+
     public static void init()
     {
-        registerContainers();
         registerFillables();
         registerFabricEvents();
+    }
+
+    private static synchronized void ensureContainersRegistered()
+    {
+        if (containersRegistered)
+            return;
+        containersRegistered = true;
+        registerContainers();
+    }
+
+    private static List<ContainerWithPurity> containers()
+    {
+        ensureContainersRegistered();
+        return waterContainers;
     }
 
     private static void registerContainers()
@@ -174,7 +191,7 @@ public class WaterPurity
     @SuppressWarnings("unused")
     public static ItemStack getFilledContainer(ItemStack container, boolean fromFilled)
     {
-        for (ContainerWithPurity waterContainer : waterContainers)
+        for (ContainerWithPurity waterContainer : containers())
             if ((!fromFilled && waterContainer.equalsEmpty(container)) || (fromFilled && waterContainer.equalsFilled(container)))
                 return waterContainer.getFilledItem().copy();
 
@@ -205,7 +222,7 @@ public class WaterPurity
 
     public static boolean isWaterFilledContainer(ItemStack item)
     {
-        for (ContainerWithPurity waterContainer : waterContainers)
+        for (ContainerWithPurity waterContainer : containers())
             if (waterContainer.equalsFilled(item))
                 return true;
 
@@ -214,7 +231,7 @@ public class WaterPurity
 
     public static boolean isEmptyWaterContainer(ItemStack item)
     {
-        for (ContainerWithPurity waterContainer : waterContainers)
+        for (ContainerWithPurity waterContainer : containers())
             if (waterContainer.equalsEmpty(item))
                 return true;
 
@@ -284,7 +301,7 @@ public class WaterPurity
 
     static boolean canHarvestRunningWater(ItemStack item)
     {
-        for (ContainerWithPurity waterContainer : waterContainers)
+        for (ContainerWithPurity waterContainer : containers())
             if (waterContainer.equalsEmpty(item) && waterContainer.canHarvestRunningWater())
                 return true;
 
