@@ -21,7 +21,7 @@
             },
             {
               "function": "minecraft:set_potion",
-              "potion": "minecraft:water"
+              "id": "minecraft:water"
             }
           ],
           "name": "minecraft:potion",
@@ -44,7 +44,7 @@
             },
             {
               "function": "minecraft:set_potion",
-              "potion": "minecraft:water"
+              "id": "minecraft:water"
             }
           ],
           "name": "minecraft:potion",

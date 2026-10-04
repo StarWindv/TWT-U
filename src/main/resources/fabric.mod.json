@@ -13,6 +13,7 @@
 	"license": "MIT",
 	"icon": "assets/twt-u/icon-u-lite.png",
 	"environment": "*",
+	"accessWidener": "twt-u.accesswidener",
 	"entrypoints": {
 		"main": [
 			"twtu.TWTU"
