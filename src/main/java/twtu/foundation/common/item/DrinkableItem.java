@@ -21,11 +21,6 @@ public class DrinkableItem extends Item
     private int drinkDuration = 32;
     private Item container;
 
-    public DrinkableItem()
-    {
-        super(new Properties().stacksTo(64));
-    }
-
     public DrinkableItem(Properties p_41383_)
     {
         super(p_41383_);
