@@ -1,16 +1,16 @@
 package twtu.content.registry;
 
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
@@ -26,29 +26,29 @@ public class ItemInit
 
     public static final ResourceKey<CreativeModeTab> THIRST_TAB_KEY = ResourceKey.create(
             Registries.CREATIVE_MODE_TAB,
-            new ResourceLocation(TWTU.MOD_ID, "thirst")
+            Identifier.fromNamespaceAndPath(TWTU.MOD_ID, "thirst")
     );
 
     public static void init()
     {
-        Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(TWTU.MOD_ID, "clay_bowl"), CLAY_BOWL);
-        Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(TWTU.MOD_ID, "terracotta_bowl"), TERRACOTTA_BOWL);
-        Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(TWTU.MOD_ID, "terracotta_water_bowl"), TERRACOTTA_WATER_BOWL);
+        Registry.register(BuiltInRegistries.ITEM, Identifier.fromNamespaceAndPath(TWTU.MOD_ID, "clay_bowl"), CLAY_BOWL);
+        Registry.register(BuiltInRegistries.ITEM, Identifier.fromNamespaceAndPath(TWTU.MOD_ID, "terracotta_bowl"), TERRACOTTA_BOWL);
+        Registry.register(BuiltInRegistries.ITEM, Identifier.fromNamespaceAndPath(TWTU.MOD_ID, "terracotta_water_bowl"), TERRACOTTA_WATER_BOWL);
 
-        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, THIRST_TAB_KEY, FabricItemGroup.builder()
+        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, THIRST_TAB_KEY, FabricCreativeModeTab.builder()
                 .title(Component.translatable("itemGroup.twt-u"))
                 .icon(() -> new ItemStack(TERRACOTTA_WATER_BOWL))
                 .build());
 
-        ItemGroupEvents.modifyEntriesEvent(THIRST_TAB_KEY).register(entries -> {
+        CreativeModeTabEvents.modifyOutputEvent(THIRST_TAB_KEY).register(entries -> {
             entries.accept(WaterPurity.addPurity(new ItemStack(Items.WATER_BUCKET), 0));
             entries.accept(WaterPurity.addPurity(new ItemStack(Items.WATER_BUCKET), 1));
             entries.accept(WaterPurity.addPurity(new ItemStack(Items.WATER_BUCKET), 2));
             entries.accept(WaterPurity.addPurity(new ItemStack(Items.WATER_BUCKET), 3));
-            entries.accept(WaterPurity.addPurity(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER), 0));
-            entries.accept(WaterPurity.addPurity(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER), 1));
-            entries.accept(WaterPurity.addPurity(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER), 2));
-            entries.accept(WaterPurity.addPurity(PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER), 3));
+            entries.accept(WaterPurity.addPurity(PotionContents.createItemStack(Items.POTION, Potions.WATER), 0));
+            entries.accept(WaterPurity.addPurity(PotionContents.createItemStack(Items.POTION, Potions.WATER), 1));
+            entries.accept(WaterPurity.addPurity(PotionContents.createItemStack(Items.POTION, Potions.WATER), 2));
+            entries.accept(WaterPurity.addPurity(PotionContents.createItemStack(Items.POTION, Potions.WATER), 3));
             entries.accept(new ItemStack(CLAY_BOWL));
             entries.accept(new ItemStack(TERRACOTTA_BOWL));
             entries.accept(WaterPurity.addPurity(new ItemStack(TERRACOTTA_WATER_BOWL), 0));
@@ -58,7 +58,3 @@ public class ItemInit
         });
     }
 }
-
-
-
-

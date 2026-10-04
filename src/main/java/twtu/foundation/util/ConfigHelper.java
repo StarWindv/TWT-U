@@ -2,7 +2,7 @@ package twtu.foundation.util;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
@@ -20,7 +20,7 @@ public class ConfigHelper
             if (itemID.startsWith("#"))
             {
                 final String tagID = itemID.replace("#", "");
-                ResourceLocation tagLoc = new ResourceLocation(tagID);
+                Identifier tagLoc = Identifier.parse(tagID);
                 TagKey<Item> tagKey = TagKey.create(BuiltInRegistries.ITEM.key(), tagLoc);
                 for (Item item : BuiltInRegistries.ITEM)
                 {
@@ -32,8 +32,8 @@ public class ConfigHelper
             }
             else
             {
-                ResourceLocation loc = new ResourceLocation(itemID);
-                Item newItem = BuiltInRegistries.ITEM.get(loc);
+                Identifier loc = Identifier.parse(itemID);
+                Item newItem = BuiltInRegistries.ITEM.getValue(loc);
 
                 if (newItem != null) map.put(newItem, new Number[]{(Number) entry.get(1), (Number) entry.get(2)});
             }
@@ -47,7 +47,7 @@ public class ConfigHelper
             if (itemID.startsWith("#"))
             {
                 final String tagID = itemID.replace("#", "");
-                ResourceLocation tagLoc = new ResourceLocation(tagID);
+                Identifier tagLoc = Identifier.parse(tagID);
                 TagKey<Item> tagKey = TagKey.create(BuiltInRegistries.ITEM.key(), tagLoc);
                 for (Item item : BuiltInRegistries.ITEM)
                 {
@@ -59,8 +59,8 @@ public class ConfigHelper
             }
             else
             {
-                ResourceLocation loc = new ResourceLocation(itemID);
-                Item newItem = BuiltInRegistries.ITEM.get(loc);
+                Identifier loc = Identifier.parse(itemID);
+                Item newItem = BuiltInRegistries.ITEM.getValue(loc);
 
                 if (newItem != null) list.add(newItem);
             }

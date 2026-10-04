@@ -3,10 +3,9 @@ package twtu.mixin;
 import twtu.content.purity.WaterPurity;
 import twtu.foundation.util.MathHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
@@ -25,7 +24,7 @@ public class MixinBucketItem
     private int purity;
 
     @Inject(method = "use", at = @At("HEAD"))
-    public void setPurity(Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir)
+    public void setPurity(Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir)
     {
         BlockPos blockPos = MathHelper.getPlayerPOVHitResult(player.level(), player, ClipContext.Fluid.SOURCE_ONLY).getBlockPos();
 
@@ -46,7 +45,3 @@ public class MixinBucketItem
         return result;
     }
 }
-
-
-
-

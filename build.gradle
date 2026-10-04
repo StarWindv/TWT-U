@@ -1,9 +1,20 @@
 plugins {
-	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 }
 
-version = project.mod_version
+// 读取当前 git 分支名，用于编译产物命名（<mod名>-<版本>-<分支名>.jar）
+def gitBranch = {
+	def headFile = file('.git/HEAD')
+	if (!headFile.exists()) return 'unknown'
+	def ref = headFile.text.trim()
+	if (ref.startsWith('ref: refs/heads/')) {
+		return ref.substring('ref: refs/heads/'.length())
+	}
+	return ref.take(7)
+}()
+
+version = "${project.mod_version}-${gitBranch}"
 group = project.maven_group
 
 repositories {}
@@ -30,15 +41,14 @@ fabricApi {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.officialMojangMappings()
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-	
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
 }
 
 processResources {
-	inputs.property "version", project.version
+	inputs.property "version", project.mod_version
 
 	filesMatching("fabric.mod.json") {
 		expand "version": inputs.properties.version
@@ -46,14 +56,11 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 17
+	it.options.release = 25
 }
 
 java {
 	withSourcesJar()
-
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
 }
 
 jar {

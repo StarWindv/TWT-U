@@ -1,6 +1,8 @@
-accessWidener v2 named
+accessWidener v2 official
 
 accessible field net/minecraft/world/level/biome/Biome climateSettings Lnet/minecraft/world/level/biome/Biome$ClimateSettings;
 accessible class net/minecraft/world/level/biome/Biome$ClimateSettings
 accessible method net/minecraft/world/level/biome/Biome$ClimateSettings downfall ()F
 accessible method net/minecraft/world/level/biome/Biome$ClimateSettings temperature ()F
+accessible field net/minecraft/world/food/FoodData exhaustionLevel F
+accessible method net/minecraft/core/cauldron/CauldronInteraction$Dispatcher put (Lnet/minecraft/world/item/Item;Lnet/minecraft/core/cauldron/CauldronInteraction;)V

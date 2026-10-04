@@ -1,31 +1,46 @@
 package twtu.foundation.network;
 
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import twtu.TWTU;
-import twtu.foundation.network.message.DrinkByHandMessage;
-import twtu.foundation.network.message.PlayerThirstSyncMessage;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import twtu.content.purity.WaterPurity;
+import twtu.foundation.common.capability.IThirst;
+import twtu.foundation.common.capability.PlayerThirstStorage;
+import twtu.foundation.config.CommonConfig;
+import twtu.foundation.network.message.DrinkByHandPayload;
+import twtu.foundation.network.message.PlayerThirstSyncPayload;
 
 public class ThirstModPacketHandler
 {
-    public static final ResourceLocation PLAYER_THIRST_SYNC = new ResourceLocation(TWTU.MOD_ID, "player_thirst_sync");
-    public static final ResourceLocation DRINK_BY_HAND = new ResourceLocation(TWTU.MOD_ID, "drink_by_hand");
-
     public static void init()
     {
-        ServerPlayNetworking.registerGlobalReceiver(DRINK_BY_HAND, DrinkByHandMessage::handleOnServer);
+        PayloadTypeRegistry.clientboundPlay().register(PlayerThirstSyncPayload.TYPE, PlayerThirstSyncPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(DrinkByHandPayload.TYPE, DrinkByHandPayload.CODEC);
+
+        ServerPlayNetworking.registerGlobalReceiver(DrinkByHandPayload.TYPE, (payload, context) -> {
+            context.server().execute(() ->
+            {
+                ServerPlayer player = context.player();
+                var level = player.level();
+                IThirst cap = PlayerThirstStorage.get(player);
+                if (cap == null) return;
+
+                if(cap.getThirst() == 20)
+                    return;
+
+                int purity = WaterPurity.getBlockPurity(level, payload.pos());
+                level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_DRINK.value(), SoundSource.NEUTRAL, 1.0F, 1.0F);
+
+                if(WaterPurity.givePurityEffects(player, purity))
+                    cap.drink(player, (int)CommonConfig.HAND_DRINKING_HYDRATION, (int)CommonConfig.HAND_DRINKING_QUENCHED);
+            });
+        });
     }
 
-    public static void sendToClient(ServerPlayer player, PlayerThirstSyncMessage message)
+    public static void sendToClient(ServerPlayer player, PlayerThirstSyncPayload message)
     {
-        FriendlyByteBuf buf = new FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
-        message.encode(buf);
-        ServerPlayNetworking.send(player, PLAYER_THIRST_SYNC, buf);
+        ServerPlayNetworking.send(player, message);
     }
 }
-
-
-
-

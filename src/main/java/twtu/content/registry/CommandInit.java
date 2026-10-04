@@ -6,7 +6,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import twtu.foundation.common.capability.IThirst;
 import twtu.foundation.common.capability.PlayerThirstStorage;
 import twtu.foundation.network.ThirstModPacketHandler;
-import twtu.foundation.network.message.PlayerThirstSyncMessage;
+import twtu.foundation.network.message.PlayerThirstSyncPayload;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -14,6 +14,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class CommandInit {
     private static void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher)
     {
         dispatcher.register(Commands.literal("thirst")
-                .requires(cs->cs.hasPermission(2))
+                .requires(cs->cs.permissions().hasPermission(Permissions.COMMANDS_MODERATOR))
                 .then(Commands.literal("query").then(Commands.argument("Player", EntityArgument.player())
                         .executes(context -> {
                                     ServerPlayer player = EntityArgument.getPlayer(context,"Player");
@@ -67,7 +68,7 @@ public class CommandInit {
                                         IThirst thirstData = PlayerThirstStorage.get(player);
                                         thirstData.setShouldTickThirst(shouldTick);
                                         ThirstModPacketHandler.sendToClient(player,
-                                                new PlayerThirstSyncMessage(shouldTick));
+                                                new PlayerThirstSyncPayload(shouldTick));
                                         playersName.add(player.getName());
                                     }
 
@@ -82,7 +83,3 @@ public class CommandInit {
         );
     }
 }
-
-
-
-

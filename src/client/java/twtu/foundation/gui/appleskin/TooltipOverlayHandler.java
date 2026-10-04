@@ -1,16 +1,11 @@
 package twtu.foundation.gui.appleskin;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import twtu.TWTU;
-import twtu.api.ThirstHelper;
-import twtu.foundation.gui.ThirstBarRenderer;
 
 public class TooltipOverlayHandler {
 
-    private static final ResourceLocation modIcons;
+    private static final Identifier modIcons;
 
     public static void init() {
         // In Fabric, tooltip rendering is handled differently
@@ -18,10 +13,6 @@ public class TooltipOverlayHandler {
     }
 
     static {
-        modIcons = new ResourceLocation(TWTU.MOD_ID, "textures/gui/appleskin_icons.png");
+        modIcons = Identifier.fromNamespaceAndPath(TWTU.MOD_ID, "textures/gui/appleskin_icons.png");
     }
 }
-
-
-
-

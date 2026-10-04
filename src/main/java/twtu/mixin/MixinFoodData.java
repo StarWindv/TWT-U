@@ -3,7 +3,7 @@ package twtu.mixin;
 import twtu.foundation.common.capability.IThirst;
 import twtu.foundation.common.capability.PlayerThirstStorage;
 import twtu.foundation.config.CommonConfig;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,9 +26,9 @@ public abstract class MixinFoodData
 
     @Redirect(
             method = {"tick"},
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;heal(F)V", ordinal = 0)
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;heal(F)V", ordinal = 0)
     )
-    private void healWithSaturation(Player player, float amount)
+    private void healWithSaturation(ServerPlayer player, float amount)
     {
         IThirst thirstData = PlayerThirstStorage.get(player);
         if(thirstData == null)
@@ -60,9 +60,9 @@ public abstract class MixinFoodData
 
     @Redirect(
             method = {"tick"},
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;heal(F)V", ordinal = 1)
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;heal(F)V", ordinal = 1)
     )
-    private void healWithHunger(Player player, float amount)
+    private void healWithHunger(ServerPlayer player, float amount)
     {
         IThirst thirstData = PlayerThirstStorage.get(player);
         if(thirstData == null)
@@ -79,7 +79,7 @@ public abstract class MixinFoodData
     }
 
     @Inject(method = "tick",at = @At(value = "HEAD"))
-    private void DealWithExhaustionBySaturation(Player player, CallbackInfo ci){
+    private void DealWithExhaustionBySaturation(ServerPlayer player, CallbackInfo ci){
         if(exhaustionLevel>4.0F){
             IThirst thirstData = PlayerThirstStorage.get(player);
             if (thirstData != null) {
@@ -88,7 +88,3 @@ public abstract class MixinFoodData
         }
     }
 }
-
-
-
-

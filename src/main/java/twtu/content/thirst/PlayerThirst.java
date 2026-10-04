@@ -7,8 +7,9 @@ import twtu.foundation.common.capability.PlayerThirstStorage;
 import twtu.foundation.common.damagesource.ModDamageSource;
 import twtu.foundation.config.CommonConfig;
 import twtu.foundation.network.ThirstModPacketHandler;
-import twtu.foundation.network.message.PlayerThirstSyncMessage;
+import twtu.foundation.network.message.PlayerThirstSyncPayload;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
@@ -136,7 +137,7 @@ public class PlayerThirst implements IThirst
                 java.lang.reflect.Field nourishmentField = modEffectsClass.getField("NOURISHMENT");
                 Object nourishmentEffect = nourishmentField.get(null);
                 // Use reflection to check if the effect is present
-                isNourished = player.hasEffect((net.minecraft.world.effect.MobEffect) nourishmentEffect);
+                isNourished = player.hasEffect((net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect>) nourishmentEffect);
             } catch (Exception ignored) {
                 // Farmer's Delight not present
             }
@@ -149,7 +150,7 @@ public class PlayerThirst implements IThirst
                 player.getActiveEffects().stream().anyMatch(e -> e.getDescriptionId().contains("saturated"));
         boolean isSitting = player.isPassenger();
 
-        if(CommonConfig.DEPLETES_WHEN_NAUSEA && player.getActiveEffects().stream().anyMatch(e->e.getEffect().equals(MobEffects.CONFUSION))){
+        if(CommonConfig.DEPLETES_WHEN_NAUSEA && player.getActiveEffects().stream().anyMatch(e->e.getEffect().equals(MobEffects.NAUSEA))){
             addExhaustion(player,0.06F);
         }
 
@@ -203,7 +204,7 @@ public class PlayerThirst implements IThirst
             {
                 if (player.getHealth() > 10.0F || difficulty == Difficulty.HARD || player.getHealth() > 0 && difficulty == Difficulty.NORMAL)
                 {
-                    player.hurt(ModDamageSource.getDamageSource(player.level(),ModDamageSource.DIE_OF_THIRST_KEY), 1.0F);
+                    player.hurtServer((ServerLevel) player.level(), ModDamageSource.getDamageSource(player.level(),ModDamageSource.DIE_OF_THIRST_KEY), 1.0F);
                 }
 
                 damageTimer = 0;
@@ -213,7 +214,7 @@ public class PlayerThirst implements IThirst
 
     void updateExhaustion(Player player)
     {
-        float hungerExhaustion = player.getFoodData().getExhaustionLevel();
+        float hungerExhaustion = player.getFoodData().exhaustionLevel;
         float normalizedHungerExhaustion = hungerExhaustion < this.prevTickExhaustion ? (exhaustionRecalculate ? hungerExhaustion + 4.0F : hungerExhaustion) : hungerExhaustion;
         if(exhaustionRecalculate){
             exhaustionRecalculate = false;
@@ -228,7 +229,7 @@ public class PlayerThirst implements IThirst
         if (player instanceof ServerPlayer serverPlayer)
         {
             ThirstModPacketHandler.sendToClient(serverPlayer,
-                    new PlayerThirstSyncMessage(thirst, quenched, exhaustion, shouldTickThirst));
+                    new PlayerThirstSyncPayload(thirst, quenched, exhaustion, shouldTickThirst));
         }
     }
 
@@ -284,10 +285,10 @@ public class PlayerThirst implements IThirst
 
     public void deserializeNBT(CompoundTag nbt)
     {
-        thirst = nbt.getInt("thirst");
-        quenched = nbt.getInt("quenched");
-        exhaustion = nbt.getFloat("exhaustion");
-        shouldTickThirst = !nbt.contains("enable") || nbt.getBoolean("enable");
+        thirst = nbt.getIntOr("thirst", 20);
+        quenched = nbt.getIntOr("quenched", 5);
+        exhaustion = nbt.getFloatOr("exhaustion", 0.0F);
+        shouldTickThirst = nbt.getBooleanOr("enable", true);
     }
 }
 

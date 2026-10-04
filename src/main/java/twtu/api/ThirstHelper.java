@@ -9,7 +9,12 @@ import twtu.foundation.config.ItemSettingsConfig;
 import twtu.foundation.config.KeyWordConfig;
 import twtu.foundation.util.ConfigHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.Holder;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -50,17 +55,6 @@ public class ThirstHelper
             WaterPurity.addContainer(new ContainerWithPurity(new ItemStack(item)));
         }
 
-        VALID_DRINKS.forEach((item, numbers) -> {
-            if (item.getFoodProperties() != null) {
-                if (!CommonConfig.ENABLE_DRINKS_NUTRITION){
-                    try {
-                        var field = item.getFoodProperties().getClass().getDeclaredField("nutrition");
-                        field.setAccessible(true);
-                        field.setInt(item.getFoodProperties(), 0);
-                    } catch (Exception ignored) {}
-                }
-            }
-        });
     }
 
     public static String keywordBlackList = KeyWordConfig.KEYWORD_BLACKLIST;
@@ -114,18 +108,16 @@ public class ThirstHelper
 
     public static int getPurity(ItemStack item)
     {
-        if(!hasPurity(item))
+        var customData = item.get(DataComponents.CUSTOM_DATA);
+        if (customData == null)
             return CommonConfig.DEFAULT_PURITY;
-        else {
-            assert item.getTag() != null;
-            return item.getTag().getInt("Purity");
-        }
+        return customData.copyTag().getIntOr("Purity", CommonConfig.DEFAULT_PURITY);
     }
 
     public static float getExhaustionFireProtModifier(Player player)
     {
         final float perLevelMultiplier = 0.0625f;
-        int totalLevels = EnchantmentHelper.getDamageProtection(player.getArmorSlots(), player.damageSources().onFire()) / 2;
+        int totalLevels = (int) (EnchantmentHelper.getDamageProtection((ServerLevel) player.level(), player, player.damageSources().onFire()) / 2);
 
         return 1.0f - ((totalLevels * perLevelMultiplier) * 0.75f);
     }
@@ -145,7 +137,7 @@ public class ThirstHelper
         BlockPos pos = player.getOnPos();
         Level level = player.level();
 
-        if(level.dimensionType().ultraWarm())
+        if(level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, pos))
             return (float) CommonConfig.NETHER_THIRST_DEPLETION_MODIFIER;
         else
         {
@@ -184,21 +176,21 @@ public class ThirstHelper
         if(!KeyWordConfig.ENABLE_KEYWORD_CONFIG)
             return false;
 
-        if(!itemStack.isEdible())
+        if(itemStack.get(DataComponents.FOOD) == null)
             return false;
 
         String pattern = keywordBlackList;
         Matcher matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
-                .matcher(itemStack.getDescriptionId());
+                .matcher(itemStack.getItem().getDescriptionId());
 
         if(matcher.find())
             return false;
 
         pattern = keywordDrink;
         matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
-                .matcher(itemStack.getDescriptionId());
+                .matcher(itemStack.getItem().getDescriptionId());
 
-        boolean hasWater=matcher.find();
+        boolean hasWater = matcher.find();
         if(hasWater)
         {
             VALID_DRINKS.put(itemStack.getItem(), new Number[]{
@@ -210,9 +202,9 @@ public class ThirstHelper
 
         pattern = keywordSoup;
         matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
-                .matcher(itemStack.getDescriptionId());
+                .matcher(itemStack.getItem().getDescriptionId());
 
-        hasWater=matcher.find();
+        hasWater = matcher.find();
         if(hasWater)
         {
             VALID_FOODS.put(itemStack.getItem(), new Number[]{
@@ -224,7 +216,7 @@ public class ThirstHelper
 
         pattern = keywordFruit;
         matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
-                .matcher(itemStack.getDescriptionId());
+                .matcher(itemStack.getItem().getDescriptionId());
 
         hasWater = matcher.find();
         if(hasWater)

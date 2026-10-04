@@ -1,17 +1,17 @@
 package twtu.foundation.common.item;
 
 import twtu.content.thirst.PlayerThirst;
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.NotNull;
@@ -59,13 +59,13 @@ public class DrinkableItem extends Item
         if (player != null)
         {
             player.awardStat(Stats.ITEM_USED.get(this));
-            if (!player.getAbilities().instabuild)
+            if (!player.getAbilities().invulnerable)
             {
                 item.shrink(1);
             }
         }
 
-        if (player == null || !player.getAbilities().instabuild)
+        if (player == null || !player.getAbilities().invulnerable)
         {
             if (item.isEmpty())
             {
@@ -84,20 +84,16 @@ public class DrinkableItem extends Item
         return item;
     }
 
-    public int getUseDuration(@NotNull ItemStack p_43001_) {
+    public int getUseDuration(@NotNull ItemStack p_43001_, @NotNull LivingEntity entity) {
         return drinkDuration;
     }
 
-    public @NotNull UseAnim getUseAnimation(@NotNull ItemStack p_42997_) {
-        return UseAnim.DRINK;
+    public @NotNull ItemUseAnimation getUseAnimation(@NotNull ItemStack p_42997_) {
+        return ItemUseAnimation.DRINK;
     }
 
-    public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level p_42993_, @NotNull Player p_42994_, @NotNull InteractionHand p_42995_)
+    public @NotNull InteractionResult use(@NotNull Level p_42993_, @NotNull Player p_42994_, @NotNull InteractionHand p_42995_)
     {
         return ItemUtils.startUsingInstantly(p_42993_, p_42994_, p_42995_);
     }
 }
-
-
-
-

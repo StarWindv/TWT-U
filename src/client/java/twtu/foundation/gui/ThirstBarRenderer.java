@@ -1,10 +1,12 @@
 package twtu.foundation.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,53 +18,51 @@ import twtu.foundation.config.ClientConfig;
 public class ThirstBarRenderer
 {
     public static IThirst PLAYER_THIRST = null;
-    public static ResourceLocation THIRST_ICONS = new ResourceLocation(TWTU.MOD_ID, "textures/gui/thirst_icons.png");
+    public static Identifier THIRST_ICONS = Identifier.fromNamespaceAndPath(TWTU.MOD_ID, "textures/gui/thirst_icons.png");
 
-    public static final ResourceLocation MC_ICONS = new ResourceLocation("textures/gui/icons.png");
+    public static final Identifier MC_ICONS = Identifier.withDefaultNamespace("textures/gui/icons.png");
     public static Boolean cancelRender = false;
     static Minecraft minecraft = Minecraft.getInstance();
     protected final static RandomSource random = RandomSource.create();
 
     public static void init()
     {
-        HudRenderCallback.EVENT.register((guiGraphics, renderTickCounter) -> {
-            boolean isMounted = minecraft.player.getVehicle() instanceof LivingEntity;
-            cancelRender = false;
-            if (!isMounted && !minecraft.options.hideGui && minecraft.player.isAlive() && shouldDrawSurvivalElements())
-            {
-                if(minecraft.player.isAlive() && PlayerThirstStorage.get(minecraft.player) != null && !PlayerThirstStorage.get(minecraft.player).getShouldTickThirst()){
-                    cancelRender = true;
-                    return;
-                }
-                render(minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight(), guiGraphics);
+        HudElementRegistry.attachElementAfter(VanillaHudElements.FOOD_BAR, Identifier.fromNamespaceAndPath(TWTU.MOD_ID, "thirst_bar"), ThirstBarRenderer::renderElement);
+    }
+
+    private static void renderElement(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker)
+    {
+        boolean isMounted = minecraft.player.getVehicle() instanceof LivingEntity;
+        cancelRender = false;
+        if (!isMounted && !minecraft.gui.hud.isHidden() && minecraft.player.isAlive() && shouldDrawSurvivalElements())
+        {
+            if(minecraft.player.isAlive() && PlayerThirstStorage.get(minecraft.player) != null && !PlayerThirstStorage.get(minecraft.player).getShouldTickThirst()){
+                cancelRender = true;
+                return;
             }
-        });
+            render(minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight(), guiGraphics);
+        }
     }
 
     private static boolean shouldDrawSurvivalElements() {
-        return minecraft.gameMode != null && !minecraft.gameMode.hasInfiniteItems();
+        return minecraft.player == null || !minecraft.player.hasInfiniteMaterials();
     }
 
-    public static void render(int width, int height, GuiGraphics guiGraphics)
+    public static void render(int width, int height, GuiGraphicsExtractor guiGraphics)
     {
-        minecraft.getProfiler().push("thirst");
         if (PLAYER_THIRST == null || minecraft.player.tickCount % 40 == 0)
         {
             PLAYER_THIRST = PlayerThirstStorage.get(minecraft.player);
         }
 
         if (PLAYER_THIRST == null) {
-            minecraft.getProfiler().pop();
             return;
         }
 
-        RenderSystem.enableBlend();
-        RenderSystem.setShaderTexture(0, THIRST_ICONS);
         int left = width / 2 + 91 + ClientConfig.THIRST_BAR_X_OFFSET;
         boolean airBarVisible = minecraft.player.isEyeInFluid(FluidTags.WATER)
                 || minecraft.player.getAirSupply() < minecraft.player.getMaxAirSupply();
         int top = height - (airBarVisible ? 59 : 48) + ClientConfig.THIRST_BAR_Y_OFFSET;
-        boolean unused = false;
 
         int level = PLAYER_THIRST.getThirst();
 
@@ -77,20 +77,12 @@ public class ThirstBarRenderer
                 y = top + (random.nextInt(3) - 1);
             }
 
-            guiGraphics.blit(THIRST_ICONS, x, y, 0, 0, 9, 9, 25, 9);
+            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, THIRST_ICONS, x, y, 0, 0, 9, 9, 25, 9);
 
             if (idx < level)
-                guiGraphics.blit(THIRST_ICONS, x, y, 16, 0, 9, 9, 25, 9);
+                guiGraphics.blit(RenderPipelines.GUI_TEXTURED, THIRST_ICONS, x, y, 16, 0, 9, 9, 25, 9);
             else if (idx == level)
-                guiGraphics.blit(THIRST_ICONS, x, y, 8, 0, 9, 9, 25, 9);
+                guiGraphics.blit(RenderPipelines.GUI_TEXTURED, THIRST_ICONS, x, y, 8, 0, 9, 9, 25, 9);
         }
-        RenderSystem.disableBlend();
-        RenderSystem.setShaderTexture(0, MC_ICONS);
-
-        minecraft.getProfiler().pop();
     }
 }
-
-
-
-

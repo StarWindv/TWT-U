@@ -10,11 +10,11 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.LiteralContents;
-import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -26,8 +26,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -37,7 +38,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,8 +66,8 @@ public class WaterPurity
     private static void registerContainers()
     {
         waterContainers.add(new ContainerWithPurity(new ItemStack(Items.GLASS_BOTTLE),
-                PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)).setEqualsFilled(itemStack ->
-                itemStack.is(Items.POTION) && PotionUtils.getPotion(itemStack) == Potions.WATER));
+                PotionContents.createItemStack(Items.POTION, Potions.WATER)).setEqualsFilled(itemStack ->
+                itemStack.is(Items.POTION) && isWaterBottle(itemStack)));
         waterContainers.add(new ContainerWithPurity(new ItemStack(ItemInit.TERRACOTTA_BOWL),
                 new ItemStack(ItemInit.TERRACOTTA_WATER_BOWL)));
         waterContainers.add(new ContainerWithPurity(new ItemStack(Items.BUCKET),
@@ -115,17 +116,15 @@ public class WaterPurity
 
         UseItemCallback.EVENT.register((player, level, hand) ->
         {
-            if (player == null)
-                return InteractionResultHolder.pass(ItemStack.EMPTY);
             ItemStack item = player.getItemInHand(hand);
 
             if (!canHarvestRunningWater(item))
-                return InteractionResultHolder.pass(item);
+                return InteractionResult.PASS;
 
             BlockPos blockPos = MathHelper.getPlayerPOVHitResult(level, player, ClipContext.Fluid.ANY).getBlockPos();
 
             if (!level.getFluidState(blockPos).is(FluidTags.WATER))
-                return InteractionResultHolder.pass(item);
+                return InteractionResult.PASS;
 
             SoundEvent sound;
             ItemStack filledItem;
@@ -133,7 +132,7 @@ public class WaterPurity
             if(item.getItem() == Items.GLASS_BOTTLE && !level.getFluidState(blockPos).isSource())
             {
                 sound = SoundEvents.BOTTLE_FILL;
-                filledItem = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
+                filledItem = PotionContents.createItemStack(Items.POTION, Potions.WATER);
             }
             else if(item.getItem() == ItemInit.TERRACOTTA_BOWL)
             {
@@ -141,18 +140,17 @@ public class WaterPurity
                 filledItem = new ItemStack(ItemInit.TERRACOTTA_WATER_BOWL);
             }
             else
-                return InteractionResultHolder.pass(item);
+                return InteractionResult.PASS;
 
             level.playSound(player, player.getX(), player.getY(), player.getZ(), sound, SoundSource.NEUTRAL, 1.0F, 1.0F);
             level.gameEvent(player, GameEvent.FLUID_PICKUP, blockPos);
 
-            CompoundTag tag = filledItem.getOrCreateTag();
-            tag.putInt("Purity", getBlockPurity(level, blockPos));
+            addPurity(filledItem, getBlockPurity(level, blockPos));
 
             ItemStack result = ItemUtils.createFilledResult(item, player, filledItem);
 
             player.setItemInHand(hand, result);
-            return InteractionResultHolder.sidedSuccess(result, level.isClientSide());
+            return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
         });
     }
 
@@ -187,7 +185,7 @@ public class WaterPurity
      * Renders the client-side tooltip for items that have a water
      * purity tag
      */
-    public static void renderPurityTooltip(ItemStack itemStack, List<net.minecraft.network.chat.Component> tooltip)
+    public static void renderPurityTooltip(ItemStack itemStack, List<Component> tooltip)
     {
         if(isWaterFilledContainer(itemStack))
         {
@@ -199,8 +197,7 @@ public class WaterPurity
                 int purityColor = getPurityColor(purity);
 
                 assert purityText != null;
-                tooltip.add(MutableComponent
-                        .create(new LiteralContents(purityText))
+                tooltip.add(Component.literal(purityText)
                         .setStyle(Style.EMPTY.withColor(purityColor)));
             }
         }
@@ -226,12 +223,18 @@ public class WaterPurity
 
     public static boolean isWaterBottle(ItemStack stack)
     {
-        return stack.is(Items.POTION) && PotionUtils.getPotion(stack) == Potions.WATER;
+        return stack.is(Items.POTION) && getPotionContents(stack).is(Potions.WATER);
     }
 
     public static boolean isPlainPotion(ItemStack stack)
     {
-        return stack.is(Items.POTION) && PotionUtils.getPotion(stack) == Potions.EMPTY;
+        PotionContents contents = getPotionContents(stack);
+        return stack.is(Items.POTION) && contents.potion().isEmpty();
+    }
+
+    private static PotionContents getPotionContents(ItemStack stack)
+    {
+        return stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
     }
 
     /**
@@ -244,20 +247,19 @@ public class WaterPurity
         if (!(isWaterFilledContainer(input) || isWaterBottle(input)))
             return result;
 
-        int inputPurity = (input.hasTag() && input.getTag() != null && input.getTag().contains("Purity"))
-                ? input.getTag().getInt("Purity") : CommonConfig.DEFAULT_PURITY;
+        int inputPurity = getPurity(input);
         int newPurity = Math.min(inputPurity + bonus, MAX_PURITY);
 
         if (isWaterBottle(result) || isPlainPotion(result))
         {
-            ItemStack upgraded = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER);
-            upgraded.getOrCreateTag().putInt("Purity", newPurity);
+            ItemStack upgraded = PotionContents.createItemStack(Items.POTION, Potions.WATER);
+            addPurity(upgraded, newPurity);
             return upgraded;
         }
         else if (isWaterFilledContainer(result))
         {
             ItemStack copy = result.copy();
-            copy.getOrCreateTag().putInt("Purity", newPurity);
+            addPurity(copy, newPurity);
             return copy;
         }
 
@@ -294,12 +296,11 @@ public class WaterPurity
      */
     public static int getPurity(ItemStack item)
     {
-        if(!item.getOrCreateTag().contains("Purity"))
-        {
+        CustomData customData = item.get(DataComponents.CUSTOM_DATA);
+        if (customData == null)
             return CommonConfig.DEFAULT_PURITY;
-        }
 
-        return Objects.requireNonNull(item.getTag()).getInt("Purity");
+        return customData.copyTag().getIntOr("Purity", CommonConfig.DEFAULT_PURITY);
     }
 
     /**
@@ -312,7 +313,7 @@ public class WaterPurity
                 purity == 1 ? "slightly_dirty" :
                         purity == 2 ? "acceptable" : "purified";
 
-        return MutableComponent.create(new TranslatableContents("twt-u.purity." + purityText,purityText,TranslatableContents.NO_ARGS)).getString();
+        return Component.translatable("twt-u.purity." + purityText, purityText).getString();
     }
 
     /**
@@ -336,12 +337,8 @@ public class WaterPurity
 
     public static boolean hasPurity(ItemStack item)
     {
-        if(!item.hasTag())
-            return false;
-        else {
-            assert item.getTag() != null;
-            return item.getTag().contains("Purity");
-        }
+        CustomData customData = item.get(DataComponents.CUSTOM_DATA);
+        return customData != null && customData.copyTag().contains("Purity");
     }
 
     /**
@@ -350,8 +347,7 @@ public class WaterPurity
      */
     public static ItemStack addPurity(ItemStack item, BlockPos pos, Level level)
     {
-        CompoundTag tag = item.getOrCreateTag();
-        tag.putInt("Purity", getBlockPurity(level, pos));
+        addPurity(item, getBlockPurity(level, pos));
 
         return  item;
     }
@@ -362,11 +358,20 @@ public class WaterPurity
      */
     public static ItemStack addPurity(ItemStack item, int purity)
     {
-        CompoundTag tag = item.getOrCreateTag();
         if(purity==CommonConfig.DEFAULT_PURITY)
-            tag.remove("Purity");
+        {
+            CustomData existing = item.get(DataComponents.CUSTOM_DATA);
+            if (existing != null)
+            {
+                CompoundTag tag = existing.copyTag();
+                tag.remove("Purity");
+                item.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+            }
+        }
         else
-            tag.putInt("Purity", purity);
+        {
+            CustomData.update(DataComponents.CUSTOM_DATA, item, tag -> tag.putInt("Purity", purity));
+        }
 
         return item;
     }
@@ -420,7 +425,7 @@ public class WaterPurity
                 if (chance < CommonConfig.DIRTY_NAUSEA_PERCENTAGE / 100.0f) {
                     if(player instanceof ServerPlayer)
                     {
-                        player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 5, 0));
+                        player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 20 * 5, 0));
                         player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 20 * 30, 0));
                     }
 
@@ -439,7 +444,7 @@ public class WaterPurity
                 if (chance < CommonConfig.SLIGHTLY_DIRTY_NAUSEA_PERCENTAGE / 100.0f) {
                     if(player instanceof ServerPlayer)
                     {
-                        player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 5, 0));
+                        player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 20 * 5, 0));
                         player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 20 * 30, 0));
                     }
 
@@ -458,7 +463,7 @@ public class WaterPurity
                 if (chance < CommonConfig.ACCEPTABLE_NAUSEA_PERCENTAGE / 100.0f) {
                     if(player instanceof ServerPlayer)
                     {
-                        player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 5, 0));
+                        player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 20 * 5, 0));
                         player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 20 * 30, 0));
                     }
 
@@ -477,7 +482,7 @@ public class WaterPurity
                 if (chance < CommonConfig.PURIFIED_NAUSEA_PERCENTAGE / 100.0f) {
                     if(player instanceof ServerPlayer)
                     {
-                        player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 5, 0));
+                        player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 20 * 5, 0));
                         player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 20 * 30, 0));
                     }
 
@@ -497,7 +502,3 @@ public class WaterPurity
         return shouldRegenerate || CommonConfig.QUENCH_THIRST_WHEN_DEBUFFED;
     }
 }
-
-
-
-

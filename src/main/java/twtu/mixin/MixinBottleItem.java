@@ -41,7 +41,3 @@ public class MixinBottleItem
         return result;
     }
 }
-
-
-
-
