@@ -33,10 +33,10 @@ Water can be purified on a campfire or a furnace: a campfire will purify it by 1
 <table>
   <tr>
     <td>
-      <img src="https://github.com/StarWindv/TWT-U/blob/26.2/example/ThirstHUD.png?raw=true" height="120">
+      <img src="https://github.com/StarWindv/TWT-U/blob/26.2/example/ThirstHUD.png?raw=true" height="120" alt="thirst hud">
     </td>
     <td>
-      <img src="https://github.com/StarWindv/TWT-U/blob/26.2/example/food-hud.png?raw=true" height="120">
+      <img src="https://github.com/StarWindv/TWT-U/blob/26.2/example/food-hud.png?raw=true" height="120" alt="food-thirst-hud">
     </td>
   </tr>
 </table>
