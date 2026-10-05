@@ -44,13 +44,13 @@ public class ThirstTooltip
             return;
         }
 
-        Component label = Component.translatable("twt-u.tooltip.thirst")
+        // One line each rather than both on one: the labels are wide in most languages, and
+        // running them together made the line too wide to read at a glance.
+        lines.add(Component.translatable("twt-u.tooltip.thirst")
                 .withStyle(ChatFormatting.GRAY)
-                .append(Component.literal(" " + ThirstHelper.getThirst(stack)).withStyle(THIRST_COLOUR))
-                .append(Component.translatable("twt-u.tooltip.quenched")
-                        .withStyle(ChatFormatting.GRAY)
-                        .append(Component.literal(" " + ThirstHelper.getQuenched(stack)).withStyle(QUENCH_COLOUR)));
-
-        lines.add(label);
+                .append(Component.literal(" " + ThirstHelper.getThirst(stack)).withStyle(THIRST_COLOUR)));
+        lines.add(Component.translatable("twt-u.tooltip.quenched")
+                .withStyle(ChatFormatting.GRAY)
+                .append(Component.literal(" " + ThirstHelper.getQuenched(stack)).withStyle(QUENCH_COLOUR)));
     }
 }
