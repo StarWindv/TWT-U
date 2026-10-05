@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import twtu.api.ThirstHelper;
+import twtu.compat.food.ModFoodRegistry;
 import twtu.content.purity.WaterPurity;
 import twtu.content.registry.CommandInit;
 import twtu.content.registry.ItemInit;
@@ -38,6 +39,11 @@ public class TWTU implements ModInitializer {
         // Initialize items and commands
         ItemInit.init();
         CommandInit.init();
+
+        // Record the food compat providers. Resolving their items here would be too early: Fabric
+        // gives no ordering guarantee between mods' initializers, so another mod's items are not
+        // necessarily registered yet. See ModFoodRegistry#process.
+        ModFoodRegistry.registerBuiltins();
 
         // Initialize water purity system
         WaterPurity.init();

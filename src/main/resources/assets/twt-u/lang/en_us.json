@@ -18,7 +18,9 @@
   "command.twt-u.query": "Current twt-u: %1$s, Current Quenched: %2$s",
   "command.twt-u.set": "set thirst to %1$s, set quenched to %2$s",
   "command.twt-u.enable": "Enable tick Thirst for %1$s",
-  "command.twt-u.disable": "Disable tick Thirst for %1$s"
+  "command.twt-u.disable": "Disable tick Thirst for %1$s",
+  "twt-u.tooltip.thirst": "Thirst:",
+  "twt-u.tooltip.quenched": "Quenched:"
 }
 
 

@@ -1,5 +1,6 @@
 package twtu.api;
 
+import twtu.compat.food.ModFoodRegistry;
 import twtu.content.purity.ContainerWithPurity;
 import twtu.content.purity.WaterPurity;
 import twtu.foundation.common.event.ThirstEventFactory;
@@ -40,6 +41,27 @@ public class ThirstHelper
     public static List<Item> containers = new ArrayList<>();
 
     public static void init(){
+        initTables();
+
+        for (Item item : containers){
+            if(item.equals(Items.AIR))
+                continue;
+            WaterPurity.addContainer(new ContainerWithPurity(new ItemStack(item)));
+        }
+    }
+
+    /**
+     * Builds the thirst and quench tables and nothing else.
+     *
+     * <p>Split out of {@link #init} because the client needs the tables for its tooltip and its
+     * held-item readout, but must not register water containers: those belong to the server, and
+     * building an {@link ItemStack} needs components that are not bound yet during entrypoint
+     * phase anyway.
+     *
+     * <p>Safe to call more than once. It clears and rebuilds, and {@link ModFoodRegistry#process}
+     * is idempotent, so a client that joins, leaves and rejoins ends up with the same tables.
+     */
+    public static void initTables(){
         VALID_DRINKS.clear();
         VALID_FOODS.clear();
         containers.clear();
@@ -49,12 +71,11 @@ public class ThirstHelper
         containers.addAll(ConfigHelper.getItems(ContainerConfig.CONTAINERS));
 
         ThirstEventFactory.onRegisterThirstValue();
-        for (Item item : containers){
-            if(item.equals(Items.AIR))
-                continue;
-            WaterPurity.addContainer(new ContainerWithPurity(new ItemStack(item)));
-        }
 
+        // Now that the item registry is frozen, the food mods can be asked for their food. Runs
+        // after the config so that a player's own values win, since addFood/addDrink use
+        // putIfAbsent.
+        ModFoodRegistry.process();
     }
 
     public static String keywordBlackList = KeyWordConfig.KEYWORD_BLACKLIST;
@@ -81,9 +102,27 @@ public class ThirstHelper
                 VALID_FOODS.containsKey(itemStack.getItem());
     }
 
-    public static void addFood(Item item, int thirst, int quenched) {}
+    /**
+     * Adds a hydration value for an item, treating it as food.
+     *
+     * <p>Uses {@code putIfAbsent}, so anything the player wrote into {@code item_settings.json}
+     * wins over a value coming from code. That is what makes the compat layer safe to ship: it
+     * only fills in what nobody has claimed yet.
+     */
+    public static void addFood(Item item, int thirst, int quenched)
+    {
+        VALID_FOODS.putIfAbsent(item, new Number[]{thirst, quenched});
+    }
 
-    public static void addDrink(Item item, int thirst, int quenched) {}
+    /**
+     * Adds a hydration value for an item, treating it as a drink.
+     *
+     * @see #addFood(Item, int, int) for the {@code putIfAbsent} semantics
+     */
+    public static void addDrink(Item item, int thirst, int quenched)
+    {
+        VALID_DRINKS.putIfAbsent(item, new Number[]{thirst, quenched});
+    }
 
     public static int getThirst(ItemStack itemStack)
     {
