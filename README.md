@@ -42,9 +42,11 @@ Water can be purified on a campfire or a furnace: a campfire will purify it by 1
 </table>
 
 💧 What's the difference?
- - You cannot directly boil bottled water over the campfire
- - You cannot use a campfire or a furnace to boil the bucket of water
+ - ~~You cannot directly boil bottled water over the campfire~~
+ - ~~You cannot use a campfire or a furnace to boil the bucket of water~~
  
+The aforementioned issue has been resolved.
+
 These issues are caused by differences in platforms. I will try to fix them
 
 💧Collaboration with other mods
