@@ -30,9 +30,16 @@ Water can be purified on a campfire or a furnace: a campfire will purify it by 1
 
 💧 HUD Overlay
 
-![thirst hud](https://github.com/StarWindv/TWT-U/blob/26.2/example/ThirstHUD.png?raw=true)
-
-![food thirst hud](https://github.com/StarWindv/TWT-U/blob/26.2/example/food-hud.png?raw=true)
+<table>
+  <tr>
+    <td>
+      <img src="https://github.com/StarWindv/TWT-U/blob/26.2/example/ThirstHUD.png?raw=true" height="120">
+    </td>
+    <td>
+      <img src="https://github.com/StarWindv/TWT-U/blob/26.2/example/food-hud.png?raw=true" height="120">
+    </td>
+  </tr>
+</table>
 
 💧 What's the difference?
  - You cannot directly boil bottled water over the campfire
