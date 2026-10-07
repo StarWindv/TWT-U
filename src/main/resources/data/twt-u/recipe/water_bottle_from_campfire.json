@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "ingredient": "minecraft:potion",
+  "result": "minecraft:potion",
+  "experience": 0.35,
+  "cookingtime": 300
+}
